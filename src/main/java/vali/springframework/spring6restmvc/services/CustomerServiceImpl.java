@@ -1,118 +1,102 @@
 package vali.springframework.spring6restmvc.services;
 
-
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
-import vali.springframework.spring6restmvc.model.Customer;
+import org.springframework.util.StringUtils;
+import vali.springframework.spring6restmvc.model.CustomerDto;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
-@Service
 @Slf4j
-@Primary
+@Service
 public class CustomerServiceImpl implements CustomerService {
 
-    private Map<UUID, Customer> pojoMap ;
+    private final Map<UUID, CustomerDto> customerMap;
 
     public CustomerServiceImpl() {
-        this.pojoMap = new HashMap<>();
+        this.customerMap = new HashMap<>();
 
-        Customer customer1 = Customer.builder()
-                .name("klienti 1")
+        CustomerDto customer1 = CustomerDto.builder()
                 .id(UUID.randomUUID())
                 .version(1)
+                .name("Klienti 1")
                 .createdData(LocalDateTime.now())
                 .updatedData(LocalDateTime.now())
                 .build();
 
-        Customer customer2 = Customer.builder()
-                .name("klienti 2")
+        CustomerDto customer2 = CustomerDto.builder()
                 .id(UUID.randomUUID())
                 .version(1)
+                .name("Klienti 2")
                 .createdData(LocalDateTime.now())
                 .updatedData(LocalDateTime.now())
                 .build();
 
-        Customer customer3 = Customer.builder()
-                .name("klienti 3")
+        CustomerDto customer3 = CustomerDto.builder()
                 .id(UUID.randomUUID())
                 .version(1)
+                .name("Klienti 3")
                 .createdData(LocalDateTime.now())
                 .updatedData(LocalDateTime.now())
                 .build();
 
-        pojoMap.put(UUID.randomUUID(), customer1);
-        pojoMap.put(UUID.randomUUID(), customer2);
-        pojoMap.put(UUID.randomUUID(), customer3);
-
+        customerMap.put(customer1.getId(), customer1);
+        customerMap.put(customer2.getId(), customer2);
+        customerMap.put(customer3.getId(), customer3);
     }
 
-
-    @Override
-    public List<Customer> listCustomer() {
-        return new ArrayList<>(pojoMap.values());
-    }
-
-    @Override
-    public Optional<Customer> getCustomerById(UUID id) {
-        log.debug("getPOJOById");
-
-        return Optional.of(pojoMap.get(id));
-    }
     @Override
     public void deleteCustomerById(UUID customerId) {
-        pojoMap.remove(customerId);
-
-    }
-    @Override
-    public void patchCustomerById(UUID customerId, Customer customer) {
-        pojoMap.put(customerId, customer);
-
+        customerMap.remove(customerId);
     }
 
-
     @Override
-    public void updateCustomerById(UUID customerId, Customer customer) {
-        Customer existingCustomer = pojoMap.get(customerId);
-        if (existingCustomer == null) {
+    public void patchCustomerById(UUID customerId, CustomerDto customer) {
+        CustomerDto existing = customerMap.get(customerId);
 
-            Customer newCustomer = Customer.builder()
-                    .id(customerId)
-                    .name(customer.getName())
-                    .version(customer.getVersion())
-                    .createdData(customer.getCreatedData())
-                    .updatedData(customer.getUpdatedData())
-                    .build();
-
-            pojoMap.put(customerId, newCustomer);
-        } else {
-            existingCustomer.setName(customer.getName());
-            existingCustomer.setVersion(customer.getVersion());
-            existingCustomer.setCreatedData(customer.getCreatedData());
-            existingCustomer.setUpdatedData(customer.getUpdatedData());
-
-            pojoMap.put(existingCustomer.getId(), existingCustomer);
+        if (existing != null && StringUtils.hasText(customer.getName())) {
+            existing.setName(customer.getName());
+            existing.setUpdatedData(LocalDateTime.now());
         }
     }
 
-
+    @Override
+    public List<CustomerDto> listCustomer() {
+        return new ArrayList<>(customerMap.values());
+    }
 
     @Override
-    public Customer saveNewCustomer(Customer customer) {
+    public Optional<CustomerDto> getCustomerById(UUID id) {
+        log.debug("Fetching customer by ID: {}", id);
+        return Optional.ofNullable(customerMap.get(id));
+    }
 
-        Customer savedCustomer = Customer.builder()
+    @Override
+    public CustomerDto saveNewCustomer(CustomerDto customer) {
+        UUID id = UUID.randomUUID();
+        CustomerDto newCustomer = CustomerDto.builder()
+                .id(id)
+                .version(1)
                 .name(customer.getName())
-                .id(UUID.randomUUID())
-                .version(customer.getVersion())
                 .createdData(LocalDateTime.now())
                 .updatedData(LocalDateTime.now())
                 .build();
 
-        pojoMap.put(customer.getId(), savedCustomer);
-
-        return savedCustomer;
+        customerMap.put(id, newCustomer);
+        return newCustomer;
     }
 
+    @Override
+    public Optional<CustomerDto> updateCustomerById(UUID customerId, CustomerDto customer) {
+        CustomerDto existing = customerMap.get(customerId);
+
+        if (existing != null) {
+            existing.setName(customer.getName());
+            existing.setVersion(customer.getVersion());
+            existing.setUpdatedData(LocalDateTime.now());
+        }
+
+        return Optional.ofNullable(existing);
+    }
 }

@@ -1,7 +1,7 @@
 package vali.springframework.spring6restmvc.services;
 
 import org.springframework.stereotype.Service;
-import vali.springframework.spring6restmvc.model.Customer;
+import vali.springframework.spring6restmvc.model.CustomerDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,16 +10,16 @@ import java.util.UUID;
 @Service
 public interface CustomerService {
 
-    List<Customer> listCustomer();
+    List<CustomerDto> listCustomer();
 
-    Optional<Customer> getCustomerById(UUID id);
+    Optional<CustomerDto> getCustomerById(UUID id);
 
-    Customer saveNewCustomer(Customer customer);
+    CustomerDto saveNewCustomer(CustomerDto customer);
 
-    void updateCustomerById(UUID customerId, Customer customer);
+    Optional<CustomerDto>  updateCustomerById(UUID customerId, CustomerDto customer);
 
     void deleteCustomerById(UUID customerId);
 
-    void patchCustomerById(UUID customerId, Customer customer);
+    void patchCustomerById(UUID customerId, CustomerDto customer);
 }
 

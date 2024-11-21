@@ -10,10 +10,9 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Builder
-@Getter
-@Setter
+@Data
 
-public class Beer {
+public class BeerDto {
     private UUID id;
     private Integer version;
     private String beerName;
