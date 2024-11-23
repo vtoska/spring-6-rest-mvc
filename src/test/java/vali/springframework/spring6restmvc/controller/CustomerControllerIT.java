@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
+import vali.springframework.spring6restmvc.entities.Beer;
 import vali.springframework.spring6restmvc.entities.Customer;
 import vali.springframework.spring6restmvc.mapper.CustomerMapper;
 import vali.springframework.spring6restmvc.model.CustomerDto;
@@ -29,6 +30,23 @@ class CustomerControllerIT {
 
     @Autowired
     CustomerMapper customerMapper;
+
+    @Test
+    void testDeleteByIdNotFound() {
+        assertThrows(NotFoundException.class, () ->
+                customerController.deleteCustomerById(UUID.randomUUID()));
+    }
+
+    @Rollback
+    @Transactional
+    @Test
+    void deleteByIdFound(){
+        Customer customer = customerRepository.findAll().get(0);
+        ResponseEntity responseEntity = customerController.deleteCustomerById(customer.getId());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(204));
+        assertThat(customerRepository.findById(customer.getId()).isEmpty());
+
+    }
 
     @Test
     void testUpdateNotFound() {
