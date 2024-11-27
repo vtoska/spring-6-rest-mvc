@@ -52,9 +52,7 @@ class BeerControllerIT {
     @Test
     void testUpdateNotFound(){
         assertThrows(NotFoundException.class, () -> {
-            beerController.updateById(UUID.randomUUID(),BeerDto.builder().build());
-
-        });
+            beerController.updateById(UUID.randomUUID(),BeerDto.builder().build());});
     }
 
     @Rollback

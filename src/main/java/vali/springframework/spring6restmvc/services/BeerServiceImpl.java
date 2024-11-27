@@ -2,8 +2,10 @@ package vali.springframework.spring6restmvc.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import vali.springframework.spring6restmvc.model.BeerDto;
 import vali.springframework.spring6restmvc.model.BeerStyle;
+import vali.springframework.spring6restmvc.model.CustomerDto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -66,9 +68,16 @@ public class BeerServiceImpl implements BeerService {
     }
 
     @Override
-    public void PatchBeerById(UUID beerId, BeerDto beer) {
+    public Optional<BeerDto> PatchBeerById(UUID beerId, BeerDto beer) {
+        BeerDto existing = beerMap.get(beerId);
 
+        if (existing != null && StringUtils.hasText(beer.getBeerName())) {
+            existing.setBeerName(beer.getBeerName());
+            existing.setUpdatedData(LocalDateTime.now());
+        }
+        return Optional.ofNullable(existing);
     }
+
 
     @Override
     public List<BeerDto> listBeers() {

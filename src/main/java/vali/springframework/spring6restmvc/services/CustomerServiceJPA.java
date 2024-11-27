@@ -3,6 +3,7 @@ package vali.springframework.spring6restmvc.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import vali.springframework.spring6restmvc.mapper.CustomerMapper;
 import vali.springframework.spring6restmvc.model.CustomerDto;
 import vali.springframework.spring6restmvc.repositories.CustomerRepository;
@@ -33,18 +34,13 @@ public class CustomerServiceJPA implements CustomerService {
     public Optional<CustomerDto> getCustomerById(UUID id) {
         return Optional.ofNullable(
                 customerMapper.customerToCustomerDto(
-                        customerRepository.findById(id).orElse(null)
-                )
-        );
+                        customerRepository.findById(id).orElse(null)));
     }
 
     @Override
     public CustomerDto saveNewCustomer(CustomerDto customer) {
-        return customerMapper.customerToCustomerDto(
-                customerRepository.save(
-                        customerMapper.customerDtoToCustomer(customer)
-                )
-        );
+        return customerMapper.customerToCustomerDto(customerRepository.save(
+                        customerMapper.customerDtoToCustomer(customer)));
     }
 
     @Override
@@ -78,7 +74,21 @@ public class CustomerServiceJPA implements CustomerService {
     }
 
     @Override
-    public void patchCustomerById(UUID customerId, CustomerDto customer) {
+    public  Optional<CustomerDto> patchCustomerById(UUID customerId, CustomerDto customer) {
+        AtomicReference<Optional<CustomerDto>> atomicReference = new AtomicReference<>();
+
+        customerRepository.findById(customerId).ifPresentOrElse(foundCustomer -> {
+            if (StringUtils.hasText(customer.getName())) {
+                foundCustomer.setName(customer.getName());
+            }
+            atomicReference.set(Optional.of(
+                    customerMapper.customerToCustomerDto(
+                            customerRepository.save(foundCustomer)
+                    )));
+        }, () -> atomicReference.set(Optional.empty()));
+
+        return atomicReference.get();
+    }
 
     }
-}
+
