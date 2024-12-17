@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import vali.springframework.spring6restmvc.model.CustomerDto;
 import vali.springframework.spring6restmvc.services.CustomerService;
@@ -37,7 +38,7 @@ public class CustomerController {
     }
 
     @PutMapping(CUSTOMER_BY_ID_URI)
-    public ResponseEntity updateCustomerById(@PathVariable("customerId") UUID customerId, @RequestBody CustomerDto customer) {
+    public ResponseEntity updateCustomerById(@PathVariable("customerId") UUID customerId,@Validated @RequestBody CustomerDto customer) {
         if (customerService.updateCustomerById(customerId, customer).isEmpty()) {
             throw new NotFoundException("Customer not found");
         }
@@ -45,7 +46,7 @@ public class CustomerController {
     }
 
     @PostMapping(CUSTOMER_URI)
-    public ResponseEntity handlePost(@RequestBody CustomerDto customer) {
+    public ResponseEntity handlePost(@Validated @RequestBody CustomerDto customer) {
         CustomerDto savedCustomer = customerService.saveNewCustomer(customer);
         HttpHeaders headers = new HttpHeaders();
         headers.add("Location", CUSTOMER_URI + "/" + savedCustomer.getId().toString());

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import vali.springframework.spring6restmvc.model.BeerDto;
 import vali.springframework.spring6restmvc.services.BeerService;
@@ -39,7 +40,7 @@ public class BeerController {
     }
 
     @PutMapping(Beer_BY_ID_URI)
-    public ResponseEntity updateById(@PathVariable("beerId")UUID beerId, @RequestBody BeerDto beer) {
+    public ResponseEntity updateById(@PathVariable("beerId")UUID beerId,@Validated @RequestBody BeerDto beer) {
         if(beerService.updateBeerById(beerId,beer).isEmpty()){
             throw new NotFoundException("Beer not found");
         }
@@ -47,7 +48,7 @@ public class BeerController {
     }
 
    @PostMapping(BEER_URI)
-   public ResponseEntity handlePost (@RequestBody BeerDto beer) {
+   public ResponseEntity handlePost (@Validated @RequestBody BeerDto beer) {
        BeerDto savedBeer = beerService.saveNewBeer(beer);
        HttpHeaders headers = new HttpHeaders();
        headers.add("Location",BEER_URI +"/" + savedBeer.getId().toString());

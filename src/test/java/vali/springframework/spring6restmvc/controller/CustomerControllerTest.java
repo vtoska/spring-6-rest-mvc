@@ -10,6 +10,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import vali.springframework.spring6restmvc.model.BeerDto;
 import vali.springframework.spring6restmvc.model.CustomerDto;
 import vali.springframework.spring6restmvc.services.CustomerService;
 import vali.springframework.spring6restmvc.services.CustomerServiceImpl;
@@ -99,7 +101,21 @@ class CustomerControllerTest {
 
         verify(customerService).updateCustomerById(any(UUID.class), any(CustomerDto.class));
     }
+    @Test
+    void testUpdateCustomerBlankName() throws Exception {
+        CustomerDto customer = customerServiceImpl.listCustomer().get(0);
+        customer.setName(" ");
 
+        given(customerService.updateCustomerById(any(),any())).willReturn(Optional.of(customer));
+
+        mockMvc.perform(put(CustomerController.CUSTOMER_URI + "/"  +customer.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.length()",is(1)));
+
+    }
     @Test
     void testCreateNewCustomer() throws Exception {
         CustomerDto customer = customerServiceImpl.listCustomer().get(0);
@@ -115,6 +131,24 @@ class CustomerControllerTest {
                         .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"));
+    }
+
+    @Test
+    void testCreateCustomerNullBeerName() throws Exception {
+
+        CustomerDto customerDto = CustomerDto.builder().build();
+
+        given(customerService.saveNewCustomer(any(CustomerDto.class))).willReturn(customerServiceImpl.listCustomer().get(1));
+
+        MvcResult mvcResult = mockMvc.perform(post(CustomerController.CUSTOMER_URI)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customerDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.length()",is(6)))
+                .andReturn();
+
+        System.out.println(mvcResult.getResponse().getContentAsString());
     }
 
     @Test

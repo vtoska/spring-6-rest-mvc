@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import vali.springframework.spring6restmvc.model.BeerDto;
 import vali.springframework.spring6restmvc.services.BeerService;
 import vali.springframework.spring6restmvc.services.BeerServiceImpl;
@@ -106,6 +107,23 @@ class BeerControllerTest {
     }
 
     @Test
+    void testUpdateBeerBlankName() throws Exception {
+        BeerDto beer = beerServiceImpl.listBeers().get(0);
+        beer.setBeerName(" ");
+
+        given(beerService.updateBeerById(any(),any())).willReturn(Optional.of(beer));
+
+        mockMvc.perform(put(BeerController.BEER_URI + "/"  +beer.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(beer)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.length()",is(1)));
+
+    }
+
+
+    @Test
     void testCreateNewBeer() throws Exception {
         BeerDto beer= beerServiceImpl.listBeers().get(0);
         beer.setVersion(null);
@@ -120,6 +138,25 @@ class BeerControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"));
     }
+
+    @Test
+    void testCreateBeerNullBeerName() throws Exception {
+
+        BeerDto beerDTO = BeerDto.builder().build();
+
+        given(beerService.saveNewBeer(any(BeerDto.class))).willReturn(beerServiceImpl.listBeers().get(1));
+
+        MvcResult mvcResult = mockMvc.perform(post(BeerController.BEER_URI)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(beerDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.length()",is(6)))
+                .andReturn();
+
+        System.out.println(mvcResult.getResponse().getContentAsString());
+    }
+
 
     @Test
     void listBeers() throws Exception {
